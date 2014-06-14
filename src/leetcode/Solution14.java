@@ -465,6 +465,69 @@ public class Solution14 {
 		 }
 		 return s.substring(0,1);
 	 }
+	 /**
+	  * ZigZag Conversion
+	  * @param s
+	  * @param nRows
+	  * @return
+	  */
+	 public String convert(String s, int nRows) {
+		 if(s == null || s.length() <= 1 || nRows == 1)
+			 return s;
+		 //the total segments
+		 int seg = s.length()%(nRows+nRows-2) == 0 ? s.length()/(nRows+nRows-2):
+			 s.length()/(nRows+nRows-2)+1;
+		 char[] c = s.toCharArray();
+		 int sz = nRows+nRows-2;//the size of each segment
+		 
+		 StringBuilder sBuilder = new StringBuilder();
+		 //for(int i=0;i<seg;i++){
+			 for(int j=0;j<nRows;j++){
+				 for(int i=0;i<seg;i++){
+					int index = i*sz + j > s.length()-1 ? -1: i*sz + j;
+					if(index >= 0)
+						sBuilder.append(c[index]);
+					if(j>0 && j<nRows-1){
+						int index2 = i*sz +	(sz-j)> s.length() -1? -1:i*sz +	(sz-j);
+						if(index2 >= 0)
+							sBuilder.append(c[index2]);
+					 }
+				}
+			 }
+		  return sBuilder.toString();
+	  }
+	 /**
+	  * reverse an integer
+	  * overflow?
+	  * 00000?
+	  * 
+	  * @param x
+	  * @return
+	  */
+	 public int reverse(int x){
+		 char[] c = Integer.toString(x).toCharArray();
+		// if(string.length() == 1)
+		 char pn = '+';
+		 int start = 0;  
+		 if(c[0] == '+' || c[0] == '-')
+		 {
+			 start = 1;
+			 pn = c[0];
+		 }
+		 int result = 0;
+		 boolean flag = false;
+		 for(int i=c.length-1;i>=start;i--){
+			 if(c[i] == '0' && flag == false)
+				 continue;
+			 if(flag == false)
+				 flag = true;
+			 if(result< (0x7fffffff-c[i]-'0')/10)
+				 result = result*10 + c[i]-'0';
+			 else 
+				return 0;// overflow	 
+		 }
+		 return pn=='+'?result:result*(-1);
+	 }
 	/**
 	 * @param args
 	 */
@@ -490,11 +553,12 @@ public class Solution14 {
 		r.next = new ListNode(9);
 		//r.next.next = new ListNode(3);
 		
-		ListNode b =new ListNode(9);
+		//ListNode b =new ListNode(9);
 		//b.next = new ListNode(9);
 		//b.next.next = new ListNode(4);		
-		System.out.println(s.longestPalindrome("ccc"));
+		//System.out.println(s.longestPalindrome("ccc"));
 		//s.addTwoNumbers(r, b);
+		System.out.println(s.reverse(0));
 	}
 
 }
