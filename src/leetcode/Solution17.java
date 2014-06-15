@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class Solution17 {
 	/**
@@ -366,14 +367,205 @@ public class Solution17 {
 	        	i--;
 	        }
     }
+	 /**
+	  * Given a string containing just the characters '(' and ')', find the length of the longest valid (well-formed) parentheses substring.
+	  * 
+	  * @param s
+	  * @return
+	  */
+	 public int longestValidParentheses(String s) {
+	        if(s == null || s.length()<=0)
+	            return 0;
+	        int max = 0;
+	        int cnt = 0;
+	        LinkedList< Integer > stack = new LinkedList<Integer>();//only push the index of '('
+	        int[] f = new int[s.length()];//'(' : 0 ; ')' : the longest length ended with this ')'
+	        if(s.charAt(0) == '(')
+	        	stack.push(0);
+	        for(int i=1;i<s.length();i++)
+	        {
+	        	if(s.charAt(i)==')')
+	        	{
+	        		if (stack.size() > 0) {
+	        			int beg = stack.pop();
+	        			cnt = i - beg + 1;
+	        			if(beg>0 && f[beg-1]>0){
+	        				cnt += f[beg-1];		
+	        			}
+	        			f[i] = cnt;
+	        			max = max>cnt?max:cnt;
+	        		}
+				}	
+	        	else {
+					stack.push(i);
+				}
+	        }
+	        return max;
+	  }
+	 /**
+	  * Search in Rotated Sorted Array
+	  * @param A
+	  * @param target
+	  * @return
+	  */
+	 public int search(int[] A, int target) {
+	      if(A == null || A.length<=0)
+	    	  return -1;
+	      //boolean flag1 = A[0]>target ? true: false; // whether the first one in the array is bigger than the target
+	      //boolean flag2 = A[A.length-1]>=target ? true:false; // whether the last one in the array is bigger than the target
+	      //binary search
+	      int left = 0;
+	      int right = A.length-1;
+	      int mid = (left+right)/2;
+	      while(left<=right){
+	    	  if(A[mid] == target)
+	    		  return mid;
+	    	  if(A[mid]<target){
+	    		  if(A[mid]>=A[right]){
+	    			  left = mid+1;
+	    			  mid = (left+right)/2;
+	    		  }else{
+	    			  if(A[right]<target){
+	    				  right = mid-1;
+	    				  mid = (left+right)/2;
+	    			  }else{
+	    				  left = mid+1;
+	    				  mid = (left+right)/2;
+	    			  }
+	    		  }
+	    	  }
+	    	  if(A[mid]>target){
+	    		  if(A[mid]>=A[right]){
+	    			  if(A[left]>target){
+	    				  left = mid+1;
+	    				  mid = (left+right)/2;
+	    			  }else{
+	    				  right = mid-1;
+	    				  mid = (left+right)/2;
+	    			  }
+	    		  }else{
+	    			  right = mid-1;
+	    			  mid = (left+right)/2;
+	    		  }
+	    	  }
+	    	  if(left >= A.length || right<0)
+	    		  break;
+	      }
+	      return -1;
+	  }
+	 /**
+	  * search for a range
+	  * @param A
+	  * @param target
+	  * @return
+	  */
+	 public int[] searchRange(int[] A, int target) {
+		 int[] ret = {-1,-1};
+		 if(A == null || A.length == 0)
+			 return ret;
+		 int left = 0;
+		 int right = A.length -1;
+		 int mid = (left+ right)/2;
+		 while(left<=right){
+			 if(A[mid] == target)
+				 break;
+			 if(A[mid]<target){
+				 left = mid+1;
+				 mid = (left+right)/2;
+			 }
+			 if(A[mid]>target){
+				 right = mid-1;
+				 mid = (left+right)/2;
+			 }
+			 if(left>A.length-1 || right <0 )
+				 break;
+		 }
+		 if(mid<A.length && mid>=0 && A[mid] == target){
+			 int low = mid;
+			 int hig = mid;
+			 while(low >=0 && A[low] == target)
+				 low--;
+			 while(hig<A.length && A[hig] == target)
+				 hig ++ ;
+
+			 ret[0] = low == 0 ? (A[low]==target? low : low+1) :low+1;
+			 ret[1] = hig == A.length-1 ? (A[hig] == target ? hig : hig-1):hig-1;
+		 }
+		 
+		 return ret;
+	 }
+	 public int searchInsert(int[] A, int target) {
+		 int left = 0;
+		 int right = A.length-1;
+		 int mid = (left+right)/2;
+		 while(left<=right){
+			 //case 1 
+			 if(left == right && A[left]!=target){
+				 if(A[left]<target)
+					 return left+1;
+				 else {
+					return left;
+				}
+			 }
+			 if(A[mid] == target)
+				 return mid;
+			 if(A[mid]<target){
+				 left = mid+1;
+				 mid = (left+right)/2;
+			 }else {
+				right = mid-1;
+				mid = (left+right)/2;
+			}	 
+		 }
+		 //case 2
+		 if(right<left)
+			 return left;
+		 return 0 ;
+	 }
+	 /**
+	  * Determine if a Sudoku is valid
+	  * @param board
+	  * @return
+	  */
+	 public boolean isValidSudoku(char[][] board) {
+	       int[][][] map = new int[3][9][10];
+	       for(int i=0;i<9;i++)
+	       {
+	    	   for(int j=0;j<9;j++){
+	    		   if(board[i][j] == '.')
+	    			   continue;
+	    		   int val = board[i][j]-'0';
+	    		   //valid the rows
+	    		   if(map[0][i][val] == 1)
+	    			   return false;
+	    		   else 
+	    			   map[0][i][val] = 1;
+	    		   //valid the column
+	    		   if(map[1][j][val] == 1)
+	    			   return false;
+	    		   else 
+	    			   map[1][j][val] = 1;
+	    		   //valid the sub-group
+	    		   if (map[2][3*(i/3)+j/3][val] == 1) 
+	    			   return false;
+	    		   else {
+					   map[2][3*(i/3)+j/3][val] = 1;
+				}
+	    	   }
+	       }
+	       return true;
+	 }
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Solution17 s = new Solution17();
-		String[] L ={"foo", "bar"};
-		System.out.println(s.findSubstring2BruteFource("barfoothefoobarman",L));
+		int[] A ={3,5,7,9,10};
+		int target = 8;
+		System.out.print(s.searchInsert(A, target));
+		//String[] L ={"foo", "bar"};
+		//System.out.println(s.findSubstring2BruteFource("barfoothefoobarman",L));
 		//String[] L = {"dhvf","sind","ffsl","yekr","zwzq","kpeo","cila","tfty","modg","ztjg","ybty","heqg","cpwo","gdcj","lnle","sefg","vimw","bxcb"};
 		//s.findSubstring("pjzkrkevzztxductzzxmxsvwjkxpvukmfjywwetvfnujhweiybwvvsrfequzkhossmootkmyxgjgfordrpapjuunmqnxxdrqrfgkrsjqbszgiqlcfnrpjlcwdrvbumtotzylshdvccdmsqoadfrpsvnwpizlwszrtyclhgilklydbmfhuywotjmktnwrfvizvnmfvvqfiokkdprznnnjycttprkxpuykhmpchiksyucbmtabiqkisgbhxngmhezrrqvayfsxauampdpxtafniiwfvdufhtwajrbkxtjzqjnfocdhekumttuqwovfjrgulhekcpjszyynadxhnttgmnxkduqmmyhzfnjhducesctufqbumxbamalqudeibljgbspeotkgvddcwgxidaiqcvgwykhbysjzlzfbupkqunuqtraxrlptivshhbihtsigtpipguhbhctcvubnhqipncyxfjebdnjyetnlnvmuxhzsdahkrscewabejifmxombiamxvauuitoltyymsarqcuuoezcbqpdaprxmsrickwpgwpsoplhugbikbkotzrtqkscekkgwjycfnvwfgdzogjzjvpcvixnsqsxacfwndzvrwrycwxrcismdhqapoojegggkocyrdtkzmiekhxoppctytvphjynrhtcvxcobxbcjjivtfjiwmduhzjokkbctweqtigwfhzorjlkpuuliaipbtfldinyetoybvugevwvhhhweejogrghllsouipabfafcxnhukcbtmxzshoyyufjhzadhrelweszbfgwpkzlwxkogyogutscvuhcllphshivnoteztpxsaoaacgxyaztuixhunrowzljqfqrahosheukhahhbiaxqzfmmwcjxountkevsvpbzjnilwpoermxrtlfroqoclexxisrdhvfsindffslyekrzwzqkpeocilatftymodgztjgybtyheqgcpwogdcjlnlesefgvimwbxcbzvaibspdjnrpqtyeilkcspknyylbwndvkffmzuriilxagyerjptbgeqgebiaqnvdubrtxibhvakcyotkfonmseszhczapxdlauexehhaireihxsplgdgmxfvaevrbadbwjbdrkfbbjjkgcztkcbwagtcnrtqryuqixtzhaakjlurnumzyovawrcjiwabuwretmdamfkxrgqgcdgbrdbnugzecbgyxxdqmisaqcyjkqrntxqmdrczxbebemcblftxplafnyoxqimkhcykwamvdsxjezkpgdpvopddptdfbprjustquhlazkjfluxrzopqdstulybnqvyknrchbphcarknnhhovweaqawdyxsqsqahkepluypwrzjegqtdoxfgzdkydeoxvrfhxusrujnmjzqrrlxglcmkiykldbiasnhrjbjekystzilrwkzhontwmehrfsrzfaqrbbxncphbzuuxeteshyrveamjsfiaharkcqxefghgceeixkdgkuboupxnwhnfigpkwnqdvzlydpidcljmflbccarbiegsmweklwngvygbqpescpeichmfidgsjmkvkofvkuehsmkkbocgejoiqcnafvuokelwuqsgkyoekaroptuvekfvmtxtqshcwsztkrzwrpabqrrhnlerxjojemcxel", L);
 		//System.out.println(s.minWindow2("acbbaca", "aba"));
