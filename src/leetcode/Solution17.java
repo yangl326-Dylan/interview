@@ -555,7 +555,254 @@ public class Solution17 {
 	       }
 	       return true;
 	 }
+	 public String multiply(String num1, String num2) {
+	       //illegal inputs
+	       if(num1 == null || num2 == null)
+	    	   return null;
+	       
+	       int len1 = num1.length();
+	       int len2 = num2.length();
+	       //illegal inputs
+	       if(len1<=0 || len2<=0)
+	    	   return null;
+	       if(num1.equals("0") || num2.equals("0"))
+	    	   return "0";
+	       
+	       char[] c1 = num1.toCharArray();
+	       char[] c2 = num2.toCharArray();
+	       String outer = "";
+	       for(int i=0;i<len1;i++){
+	    	   String sum = "";
+	    	   int d1 = c1[i]-'0';
+	    	   for(int j=0;j<len2;j++){
+	    		   int d2 = c2[j]-'0';
+	    		   int ret = d1*d2; //multi
+	    		   sum = sum3(sum, ret);
+	    	   }
+	    	   outer = sum2(outer, sum);
+	       }
+	       
+	       return outer;
+	 }
+	 private String sum3(String sum, int ret){
+		 if(ret<10){
+			 return sum+String.valueOf(ret);
+		 }else{
+			 int carray = ret/10;
+			 String tmpString = sum1(sum, String.valueOf(carray));
+			 return tmpString + String.valueOf(ret%10);
+		 }
+	 }
+	 /**
+	  * num1*10+num2
+	  * @param num1
+	  * @param num2
+	  * @return
+	  */
+	 private String sum2(String num1,String num2){
+		 if(num1.equals(""))
+			 return num2;
+		 return sum1(num1+"0", num2);
+	 }
+	 /**
+	  * num1+num2
+	  * @param num1
+	  * @param num2
+	  * @return
+	  */
+	 public String sum1(String num1,String num2){
+		 StringBuffer string = new StringBuffer();
+		 int i= num1.length()-1;
+		 int j= num2.length()-1;
+		 if(i<j)
+		 {
+			 String tmp = num2;
+			 num2 = num1;
+			 num1 = tmp;
+			 i = num1.length()-1;
+			 j = num2.length()-1;
+		 }
+		 int carray =0;
+		 int ret = 0;
+		 while (true) {
+			 if(j<0 && carray == 0)
+				 break;
+			int d1 = i>=0? num1.charAt(i)-'0' : 0;
+			int d2 = j>=0? num2.charAt(j)-'0' : 0;
+			ret = (d1+d2 + carray)%10;
+			carray = (d1+d2 + carray)/10;
+			
+			string.append(ret);
+			i--;
+			j--;
+		}
+		 //reverse
+		 StringBuffer sBuffer = i>=0 ? new StringBuffer(num1.subSequence(0, i+1)) :new StringBuffer();
+		 String tmp = string.toString();
+		 for(i=string.toString().length()-1;i>=0;i--)
+			 sBuffer.append(tmp.charAt(i));
+		 return sBuffer.toString();
+	 }
+	 /**
+	  * Solution: DP
+	  * @param s
+	  * @param p
+	  * @return
+	  */
+	 public boolean isMatch(String s, String p) {
+		 if(s== null && p == null)
+			 return true;
+		 if(s.equals(p))
+			 return true;
+		 if(!s.equals("") && p.equals(""))
+			 return false;
+		 if(s.length() <=0 && p.equals("*"))
+			 return true;
+		 if(s.length() <=0 && !p.equals("*"))
+			 return false;
+		 if(p.equals("*"))
+			 return true;
+		//the special case : there is no '?'
+		 boolean f = p.contains("*");
+		 if(!f && p.length()!=s.length())
+			 return false;
+		 if(p.length() == s.length()){
+			 for(int i=0;i<p.length();i++){
+				 if(!(p.charAt(i)==s.charAt(i) || p.charAt(i)=='?' || p.charAt(i)=='*'))//m
+					 return false;
+			 }
+			 return true;
+		 }
+		 int l1 = s.length();
+		 int l2 = p.length();
+		 boolean[][] dp = new boolean[l2][l1];
+		 
+		 for(int i=0;i<l2;i++){
+			 for(int j=0;j<l1;j++){
+				 if(i == 0 ){ // the first row
+					 if(j == 0){
+						 if(p.charAt(i) == s.charAt(j) || p.charAt(i) == '*' || p.charAt(i) == '?')
+							 dp[i][j] = true;
+						 else {
+							dp[i][j] = false;
+						}
+					 }else{
+						 if(p.charAt(i) == '*')
+							 dp[i][j] = true;
+						 else {
+							dp[i][j] = false;
+						}
+					 }
+				}else { //the other rows
+					if(j == 0) {
+						if(dp[i-1][j] == true && p.charAt(i) == '*')
+							dp[i][j] = true;
+						else {
+							dp[i][j] = false;
+						}
+					}else{
+						//case 1 : p[0...i-1] is matched s[0...j] && p[i] = '?'
+						if(dp[i-1][j] == true && p.charAt(i) == '*')
+							dp[i][j] = true;
+						else if(dp[i-1][j-1] == true && (
+								p.charAt(i) == s.charAt(j) || p.charAt(i) == '*' || p.charAt(i) == '?')) //case 2 : p[0..i-1] is matched s[0...j-1] && p[i] is matched s[j]
+						{
+							dp[i][j] = true;
+						}else {
+							dp[i][j] = false;
+						}
+					}
+				}
+			 }
+		 }
+		 return dp[l2-1][l1-1];
+	 }
+	 /**
+	  * Solution: DP
+	  * O(n) space complexity
+	  * @param s
+	  * @param p
+	  * @return
+	  */
+	 public boolean isMatch2(String s, String p) {
+		 if(s== null && p == null)
+			 return true;
+		 if(s.equals(p))
+			 return true;
+		 if(!s.equals("") && p.equals(""))
+			 return false;
+		 if(s.length() <=0 && p.equals("*"))
+			 return true;
+		 if(s.length() <=0 && !p.equals("*"))
+			 return false;
+		 if(p.equals("*"))
+			 return true;
+		//the special case : there is no '?'
+		 boolean f = p.contains("*");
+		 if(!f && p.length()!=s.length())
+			 return false;
+		 if(!f){
+			 for(int i=0;i<p.length();i++){
+				 if(!(p.charAt(i)==s.charAt(i) || p.charAt(i)=='?'))//m
+					 return false;
+			 }
+			 return true;
+		 }
+		 int l1 = s.length();
+		 int l2 = p.length();
+		 boolean[][] dp = new boolean[2][l1];
+		 
+		 for(int i=0;i<l2;i++){
+			 for(int j=0;j<l1;j++){
+				 if(i == 0 ){ // the first row
+					 if(j == 0){
+						 if(p.charAt(i) == s.charAt(j) || p.charAt(i) == '*' || p.charAt(i) == '?')
+							 dp[i%2][j] = true;
+						 else {
+							dp[i%2][j] = false;
+						}
+					 }else{
+						 if(p.charAt(i) == '*')
+							 dp[i%2][j] = true;
+						 else {
+							 System.out.println(i%2 + " ");
+							dp[i%2][j] = false;
+						}
+					 }
+				}else { //the other rows
+					if(j == 0) {
+						if(dp[i%2==0? 1: 0][j] == true && p.charAt(i) == '*')
+							dp[i%2][j] = true;
+						else {
+							dp[i%2][j] = false;
+						}
+					}else{
+						//case 1 : p[0...i-1] is matched s[0...j] && p[i] = '?'
+						if(dp[i%2 == 0 ? 1:0][j] == true && p.charAt(i) == '*')
+							dp[i%2][j] = true;
+						else if(dp[i%2 == 0 ? 1:0][j-1] == true && (
+								p.charAt(i) == s.charAt(j) || p.charAt(i) == '*' || p.charAt(i) == '?')) //case 2 : p[0..i-1] is matched s[0...j-1] && p[i] is matched s[j]
+						{
+							dp[i%2][j] = true;
+						}else {
+							dp[i%2][j] = false;
+						}
+					}
+				}
+			 }
+		 }
+		 return dp[(l2-1)%2][l1-1];
+	 }
 	/**
+	 * 普通的DP总是会遇到TLE问题
+	 * @param s
+	 * @param p
+	 * @return
+	 */
+	 public boolean isMatch3(String s, String p) {
+		 
+	 }
+	 /**
 	 * @param args
 	 */
 	public static void main(String[] args) {
@@ -563,7 +810,9 @@ public class Solution17 {
 		Solution17 s = new Solution17();
 		int[] A ={3,5,7,9,10};
 		int target = 8;
-		System.out.print(s.searchInsert(A, target));
+		String s1 = "aab";
+		String p = "c*a*b";
+		System.out.print(s.isMatch2(s1, p));
 		//String[] L ={"foo", "bar"};
 		//System.out.println(s.findSubstring2BruteFource("barfoothefoobarman",L));
 		//String[] L = {"dhvf","sind","ffsl","yekr","zwzq","kpeo","cila","tfty","modg","ztjg","ybty","heqg","cpwo","gdcj","lnle","sefg","vimw","bxcb"};
